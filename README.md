@@ -96,4 +96,4 @@ pip install -e .
 If you use this code, please cite:
 
 Surg-SegFormer: A Dual Transformer-Based Model for Holistic Surgical Scene Segmentation
-https://doi.org/10.48550/arXiv.2507.04304
+[https://doi.org/10.48550/arXiv.2507.04304](https://ieeexplore.ieee.org/document/11163962)
