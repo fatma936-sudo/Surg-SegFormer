@@ -1,17 +1,16 @@
-# Surg-SegFormer (clean GitHub-ready code)
+# Surg-SegFormer
+This repo includes the code for Surg-SegFormer: A Dual Transformer-Based Model for Holistic Surgical Scene Segmentation: https://doi.org/10.48550/arXiv.2507.04304 <br/>
 
-This repo is a **structured codebase** for a dual-model surgical scene segmentation pipeline:
+![Alt text](Dual_Model_fusion.png)
 
-- **SegAnatomy**: `SegFormer MiT-B2` fine-tuned for anatomical objects
-- **SegTool**: `SegFormer MiT-B5` encoder with a **lightweight skip-connection decoder** for surgical tools
-- **Fusion**: a priority-weighted conditional fusion operator that combines both outputs into one final mask
+# Abstract
+Holistic surgical scene segmentation in robot-assisted surgery (RAS) enables surgical residents to identify various anatomical tissues, articulated tools, and critical structures, such as veins and vessels. Given the firm intraoperative time constraints, it is challenging for surgeons to provide detailed real-time explanations of the operative field for trainees. This challenge is compounded by the scarcity of expert surgeons relative to trainees, making the unambiguous delineation of go- and no-go zones inconvenient. Therefore, high-performance semantic segmentation models offer a solution by providing clear postoperative analyses of surgical procedures. However, recent advanced segmentation models rely on user-generated prompts, rendering them impractical for lengthy surgical videos that commonly exceed an hour. To address this challenge, we introduce Surg-SegFormer, a novel prompt-free model that outperforms current state-of-the-art techniques. Surg-SegFormer attained a mean Intersection over Union (mIoU) of 0.80 on the EndoVis2018 dataset and 0.54 on the EndoVis2017 dataset. By providing robust and automated surgical scene comprehension, this model significantly reduces the tutoring burden on expert surgeons, empowering residents to independently and effectively understand complex surgical environments.
 
-The structure follows the paper’s high-level design:
-- dual SegFormer instances (B2 anatomy + B5 tools with custom decoder) citeturn1view0
-- hybrid **Tversky + Cross Entropy** combined loss with **Tversky α=0.7, β=0.3** citeturn1view0
-- geometric augmentations (flips / crops / rotations) citeturn1view0
+![Alt text](Tools_instance.png)
 
-> Note: the paper names the fusion as “priority-weighted conditional fusion” but does not fully specify the exact equation in the public PDF, so this repo provides a sane, configurable implementation you can adapt. citeturn1view0
+
+# To Run the Code
+
 
 ## 1) Install
 
