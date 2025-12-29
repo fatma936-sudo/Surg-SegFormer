@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "surg-segformer"
+version = "0.1.0"
+description = "Surg-SegFormer: Dual SegFormer pipeline for holistic surgical scene segmentation"
+requires-python = ">=3.9"
+dependencies = [
+  "torch",
+  "torchvision",
+  "transformers>=4.38",
+  "opencv-python",
+  "numpy",
+  "tqdm",
+  "pyyaml",
+  "albumentations",
+]
+
+[tool.setuptools.packages.find]
+include = ["surg_segformer*"]

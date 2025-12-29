@@ -1,0 +1,40 @@
+labels_json: labels.json
+labels:
+  background_id: 0
+  tool_ids:
+  - 1
+  - 2
+  - 3
+  - 6
+  - 7
+  - 8
+  - 9
+  - 11
+  anatomy_ids:
+  - 4
+  - 5
+  - 10
+data:
+  root: DATA_ROOT
+  size: 512
+  augment: true
+  remap_to_contiguous: true
+model:
+  backbone: nvidia/mit-b2
+  num_classes: 4
+loss:
+  tversky_alpha: 0.7
+  tversky_beta: 0.3
+  alpha_weight: 0.5
+train:
+  epochs: 50
+  batch_size: 4
+  lr: 6.0e-05
+  weight_decay: 0.01
+  num_workers: 4
+  out_dir: outputs/anatomy
+  amp: true
+test:
+  batch_size: 4
+  num_workers: 4
+  out_dir: outputs/anatomy_test

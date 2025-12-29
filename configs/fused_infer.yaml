@@ -1,0 +1,28 @@
+data:
+  size: 512
+anatomy:
+  backbone: nvidia/mit-b2
+  num_classes: 4
+tools:
+  backbone: nvidia/mit-b5
+  num_classes: 9
+  proj_dim: 128
+  dropout: 0.1
+fusion:
+  tool_background_id_global: 0
+  conf_threshold: 0.5
+  tools_local_to_global:
+    0: 0
+    1: 1
+    2: 2
+    3: 3
+    4: 6
+    5: 7
+    6: 8
+    7: 9
+    8: 11
+  anatomy_local_to_global:
+    0: 0
+    1: 4
+    2: 5
+    3: 10
