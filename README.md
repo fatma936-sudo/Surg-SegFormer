@@ -12,127 +12,88 @@ Holistic surgical scene segmentation in robot-assisted surgery (RAS) enables sur
 # To Run the Code
 
 
-## 1) Install
 
+**Notes**
+- Only **left camera frames** are used (`left_frames/`)
+- Label masks are **single-channel PNG images**
+- Mask filenames must match frame filenames
+- Pixel values represent **global class ids**
+
+The data loader is implemented in:
+
+
+----------
+
+## Classes and Label Definition
+
+All class definitions follow the official `labels.json` file included in this repository.
+
+**Global class IDs**
+- `0`: background-tissue
+- **Tool classes**: `1, 2, 3, 6, 7, 8, 9, 11`
+- **Anatomy classes**: `4, 5, 10`
+
+---
+
+## Data Splits
+
+This repository strictly enforces the following split policy:
+
+- **train/** → training only
+- **val/** → validation only (model selection)
+- **test/** → final evaluation only
+
+*No frames from the test set are used during training or validation.*
+
+---
+
+## Training Strategy
+
+Surg-SegFormer uses a **dual-model training strategy**.
+
+### Anatomy Segmentation Model
+- Trained **only on anatomical classes**
+- All tool pixels are mapped to background
+- Architecture: **SegFormer MiT-B2**
+- Output label space: `{background + anatomy classes}`
+
+### Tools Segmentation Model
+- Trained **only on surgical tool classes**
+- All anatomy pixels are mapped to background
+- Architecture: **SegFormer MiT-B5** with a custom lightweight skip-connection decoder
+- Output label space: `{background + tool classes}`
+
+Each model is trained on a **contiguous task-specific label space** for stability.
+
+---
+
+## Fusion at Inference
+
+At inference time:
+1. Both models generate predictions independently
+2. Predictions are mapped back to **global class IDs**
+3. A **priority-weighted conditional fusion operator** merges the outputs:
+   - Tool predictions overwrite anatomy predictions when confidence exceeds a threshold
+   - Otherwise, anatomy predictions are retained
+
+This produces a **single holistic segmentation mask** for the surgical scene.
+
+---
+
+## Environment Setup
 ```bash
 python -m venv .venv
-source .venv/bin/activate
+source .venv/bin/activate        # Linux / macOS
+# .venv\Scripts\activate         # Windows
+
+pip install --upgrade pip
 pip install -e .
 ```
 
-## 2) Dataset layout
-
-Default expected folder structure:
-
-```
-DATA_ROOT/
-  images/
-    train/*.png
-    val/*.png
-    test/*.png
-  masks/
-    train/*.png
-    val/*.png
-    test/*.png
-```
-
-Masks must be **single-channel** images with integer class ids `0..C-1`.
-
-If your EndoVis layout differs, edit the `configs/*.yaml` paths.
-
-## 3) Train
-
-### Anatomy (MiT-B2)
-
-```bash
-python scripts/train_anatomy.py --config configs/anatomy.yaml
-```
-
-### Tools (MiT-B5 + skip decoder)
-
-```bash
-python scripts/train_tools.py --config configs/tools.yaml
-```
-
-Checkpoints:
-- `outputs/*/best.pt`
-- `outputs/*/last.pt`
-
-## 4) Test
-
-```bash
-python scripts/test_anatomy.py --config configs/anatomy.yaml --ckpt outputs/anatomy/best.pt
-python scripts/test_tools.py   --config configs/tools.yaml   --ckpt outputs/tools/best.pt
-```
-
-Add `--save_preds` to dump per-image predicted masks.
-
-## 5) Fused inference (final mask)
-
-```bash
-python scripts/infer_fused.py   --config configs/fused_infer.yaml   --anatomy_ckpt outputs/anatomy/best.pt   --tools_ckpt outputs/tools/best.pt   --image path/to/frame.png   --out outputs/inference
-```
-
-This produces `*_final.png` masks.
-
-## Where to plug your existing notebook code
-
-You uploaded:
-- custom decoder draft
-- training/testing scripts
-- metrics
-
-I kept **the repo structure** clean and separated, so it’s easy to drop your exact logic in:
-- `surg_segformer/models/tools.py`  (your custom decoder)
-- `surg_segformer/losses/combined.py`
-- `surg_segformer/data/endovis.py`
-- `scripts/*.py`
-
-If you share your **full notebooks / full decoder code (not truncated with `...`)**, I can refactor it into this repo directly with a 1:1 match.
 
 ## Citation
 
-If you use this repo, please cite the original paper:
+If you use this code, please cite:
 
-**Surg-SegFormer: A Dual Transformer-Based Model for Holistic Surgical Scene Segmentation**. citeturn1view0
-
-## EndoVis2018 Dataset Structure
-
-This codebase follows the **EndoVis2018** sequence-based directory layout by default:
-
-```
-DATA_ROOT/
-├── train/
-│   ├── seq_1/
-│   │   ├── left_frames/
-│   │   │   ├── frame000.png
-│   │   │   └── ...
-│   │   └── labels/
-│   │       ├── frame000.png
-│   │       └── ...
-│   ├── seq_2/
-│   └── ...
-├── val/
-│   └── seq_*/
-└── test/
-    └── seq_*/
-```
-
-Users can adapt the loader for other datasets by editing:
-`./surg_segformer/data/endovis.py`
-
-## Classes (from labels.json)
-
-The repo reads class IDs from `labels.json` (included in this repo). fileciteturn0file0L1-L64
-
-**Global class ids:**
-- 0: background-tissue
-- Tools: [1, 2, 3, 6, 7, 8, 9, 11]
-- Anatomy: [4, 5, 10]
-
-During training:
-- **Tools model** is trained **only** on tool classes (all anatomy pixels are mapped to background).
-- **Anatomy model** is trained **only** on anatomy classes (all tool pixels are mapped to background).
-
-At inference:
-- Both predictions are mapped back to the **global ids** and fused into a single final mask.
+Surg-SegFormer: A Dual Transformer-Based Model for Holistic Surgical Scene Segmentation
+https://doi.org/10.48550/arXiv.2507.04304
